@@ -1,10 +1,9 @@
 """
-Models for Product
+Models for YourResourceModel
 
 All of the models are stored in this module
 """
 import logging
-from enum import Enum
 from flask_sqlalchemy import SQLAlchemy
 
 logger = logging.getLogger("flask.app")
@@ -15,29 +14,17 @@ db = SQLAlchemy()
 
 # Function to initialize the database
 def init_db(app):
-    """Initializes the SQLAlchemy app"""
-    Product.init_db(app)
+    """ Initializes the SQLAlchemy app """
+    YourResourceModel.init_db(app)
 
 
 class DataValidationError(Exception):
-    """Used for an data validation errors when deserializing"""
+    """ Used for an data validation errors when deserializing """
 
 
-class Category(Enum):
-    """Enumeration of valid Product Category"""
-
-    ELECTRONICS = 0
-    PERSONAL_CARE = 1
-    TOYS = 2
-    SPORTS = 3
-    FOOD = 4
-    HEALTH = 5
-    OTHERS = 100
-
-
-class Product(db.Model):
+class YourResourceModel(db.Model):
     """
-    Class that represents a Product
+    Class that represents a YourResourceModel
     """
 
     app = None
@@ -45,18 +32,13 @@ class Product(db.Model):
     # Table Schema
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(63))
-    description = db.Column(db.Text, nullable=True)
-    price = db.Column(db.Float, nullable=False)
-    available = db.Column(db.Boolean(), nullable=False, default=True)
-    image_url = db.Column(db.Text, nullable=True)
-    category = db.Column(db.Enum(Category), nullable=True)
 
     def __repr__(self):
-        return f"<Product {self.name} id=[{self.id}]>"
+        return f"<YourResourceModel {self.name} id=[{self.id}]>"
 
     def create(self):
         """
-        Creates a Product to the database
+        Creates a YourResourceModel to the database
         """
         logger.info("Creating %s", self.name)
         self.id = None  # pylint: disable=invalid-name
@@ -65,70 +47,44 @@ class Product(db.Model):
 
     def update(self):
         """
-        Updates a Product to the database
+        Updates a YourResourceModel to the database
         """
         logger.info("Saving %s", self.name)
-        if not self.id:
-            raise DataValidationError("Update called with empty ID field")
         db.session.commit()
 
     def delete(self):
-        """Removes a Product from the data store"""
+        """ Removes a YourResourceModel from the data store """
         logger.info("Deleting %s", self.name)
         db.session.delete(self)
         db.session.commit()
 
     def serialize(self):
-        """Serializes a Product into a dictionary"""
-        return {
-            "id": self.id,
-            "name": self.name,
-            "description": self.description,
-            "price": self.price,
-            "available": self.available,
-            "image_url": self.image_url,
-            "category": self.category.name,  # convert enum to string
-        }
+        """ Serializes a YourResourceModel into a dictionary """
+        return {"id": self.id, "name": self.name}
 
     def deserialize(self, data):
         """
-        Deserializes a Product from a dictionary
+        Deserializes a YourResourceModel from a dictionary
 
         Args:
             data (dict): A dictionary containing the resource data
         """
         try:
             self.name = data["name"]
-            self.description = data["description"]
-            self.price = data["price"]
-            self.description = data["description"]
-            if isinstance(data["available"], bool):
-                self.available = data["available"]
-            else:
-                raise DataValidationError(
-                    "Invalid type for boolean [available]: "
-                    + str(type(data["available"]))
-                )
-            self.image_url = data["image_url"]
-            self.category = getattr(
-                Category, data["category"]
-            )  # create enum from string
-        except AttributeError as error:
-            raise DataValidationError("Invalid attribute: " + error.args[0]) from error
         except KeyError as error:
             raise DataValidationError(
-                "Invalid Product: missing " + error.args[0]
+                "Invalid YourResourceModel: missing " + error.args[0]
             ) from error
         except TypeError as error:
             raise DataValidationError(
-                "Invalid Product: body of request contained bad or no data "
-                + str(error)
+                "Invalid YourResourceModel: body of request contained bad or no data - "
+                "Error message: " + error
             ) from error
         return self
 
     @classmethod
     def init_db(cls, app):
-        """Initializes the database session"""
+        """ Initializes the database session """
         logger.info("Initializing database")
         cls.app = app
         # This is where we initialize SQLAlchemy from the Flask app
@@ -138,64 +94,22 @@ class Product(db.Model):
 
     @classmethod
     def all(cls):
-        """Returns all of the Product in the database"""
-        logger.info("Processing all Product")
+        """ Returns all of the YourResourceModels in the database """
+        logger.info("Processing all YourResourceModels")
         return cls.query.all()
 
     @classmethod
     def find(cls, by_id):
-        """Finds a Product by it's ID"""
+        """ Finds a YourResourceModel by it's ID """
         logger.info("Processing lookup for id %s ...", by_id)
         return cls.query.get(by_id)
 
     @classmethod
-    def find_or_404(cls, product_id: int):
-        """Find a Product by it's id
-
-        :param product_id: the id of the Product to find
-        :type product_id: int
-
-        :return: an instance with the product_id, or 404_NOT_FOUND if not found
-        :rtype: Product
-
-        """
-        logger.info("Processing lookup or 404 for id %s ...", product_id)
-        return cls.query.get_or_404(product_id)
-
-    @classmethod
     def find_by_name(cls, name):
-        """Returns all Product with the given name
+        """Returns all YourResourceModels with the given name
 
         Args:
-            name (string): the name of the Product you want to match
+            name (string): the name of the YourResourceModels you want to match
         """
         logger.info("Processing name query for %s ...", name)
         return cls.query.filter(cls.name == name)
-
-    @classmethod
-    def find_by_availability(cls, available: bool = True) -> list:
-        """Returns all Products by their availability
-
-        :param available: True for products that are available
-        :type available: str
-
-        :return: a collection of Products that are available
-        :rtype: list
-
-        """
-        logger.info("Processing available query for %s ...", available)
-        return cls.query.filter(cls.available == available)
-
-    @classmethod
-    def find_by_category(cls, category: Category) -> list:
-        """Returns all of the Pets in a category
-
-        :param category: the category of the Pets you want to match
-        :type category: Category Enum
-
-        :return: a collection of Pets in that category
-        :rtype: list
-
-        """
-        logger.info("Processing category query for %s ...", category)
-        return cls.query.filter(cls.category == category)
