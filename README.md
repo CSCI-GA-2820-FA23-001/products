@@ -55,6 +55,19 @@ tests/              - test cases package
 └── test_routes.py  - test suite for service routes
 ```
 
+## Database Structure
+
+| Field Name | Type | Nullable | Remark |
+| :---------- | :----------- | :-----------: |:----------- |
+| id | *Integer* | No | |
+| name | *String* | No | |
+| description | *Text* | Yes | |
+| price | *Float* | No | |
+| available | *Boolean* | No | True or False |
+| image_url | *Text* | Yes | |
+| category | *Enum* | Yes | ELECTRONICS, PERSONAL_CARE, TOYS, SPORTS, FOOD, HEALTH, OTHERS |
+
+
 ## License
 
 Copyright (c) John Rofrano. All rights reserved.
