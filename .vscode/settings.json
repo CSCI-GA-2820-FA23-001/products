@@ -17,5 +17,12 @@
     "cucumberautocomplete.strictGherkinValidation": true,
     "cucumberautocomplete.smartSnippets": true,
     "cucumberautocomplete.gherkinDefinitionPart": "@(given|when|then)\\(",
+    "cSpell.ignoreWords": [
+        "SQLALCHEMY"
+    ],
+    "cSpell.words": [
+        "healthcheck",
+        "jsonify"
+    ],
 }
 
