@@ -133,26 +133,6 @@ def delete_products(product_id):
 
 
 ######################################################################
-# READ A PRODUCT
-######################################################################
-@app.route("/products/<int:product_id>", methods=["GET"])
-def read_products(product_id):
-    """
-    Read a Product
-    This endpoint will Read a Product for detail based the id specified in the path
-    """
-    app.logger.info("Request to read product with id: %s", product_id)
-    product = Product.find(product_id)
-    if not product:
-        abort(
-            status.HTTP_404_NOT_FOUND, f"Product with id '{product_id}' was not found."
-        )
-
-    app.logger.info("Returning product with ID [%s].", product_id)
-    return jsonify(product.serialize()), status.HTTP_200_OK
-
-
-######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################
 
