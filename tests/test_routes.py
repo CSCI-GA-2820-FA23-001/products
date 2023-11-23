@@ -235,7 +235,7 @@ class TestYourResourceServer(TestCase):
         # Check the initial availability
         self.assertTrue(test_product.available)
         # Change the availability
-        response = self.client.post(f"{BASE_URL}/{test_product.id}/change_availability")
+        response = self.client.put(f"{BASE_URL}/{test_product.id}/change_availability")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Check if the availability has changed in the database
         updated_product = Product.query.get(test_product.id)
@@ -243,7 +243,7 @@ class TestYourResourceServer(TestCase):
 
     def test_change_product_availability_not_found(self):
         """It should not Change the availability of a Product that not be found"""
-        response = self.client.post(f"{BASE_URL}/0/change_availability")
+        response = self.client.put(f"{BASE_URL}/0/change_availability")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     ######################################################################

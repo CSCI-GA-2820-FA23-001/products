@@ -166,7 +166,7 @@ def read_products(product_id):
 ######################################################################
 # ACTION TO CHANGE A PRODUCT'S AVAILABILITY
 ######################################################################
-@app.route("/products/<int:product_id>/change_availability", methods=["POST"])
+@app.route("/products/<int:product_id>/change_availability", methods=["PUT"])
 def change_product_availability(product_id):
     """
     Change Product Availability
