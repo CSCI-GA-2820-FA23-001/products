@@ -4,7 +4,6 @@ My Service
 Describe what your service does here
 """
 
-from flask import jsonify, request
 from flask_restx import Resource, fields, reqparse, inputs
 from service.common import status  # HTTP Status Codes
 from service.models import Product, Category
@@ -66,6 +65,7 @@ def index():
     # }
     return app.send_static_file("index.html")
 
+
 # Define the model so that the docs reflect what can be sent
 create_model = api.model(
     "Product",
@@ -88,7 +88,7 @@ create_model = api.model(
         ),
         # pylint: disable=protected-access
         "category": fields.String(
-            enum=Category._member_names_, 
+            enum=Category._member_names_,
             description="he category of Product (e.g., ELECTRONICS, FOOD, etc.)"
         ),
     },
@@ -122,6 +122,7 @@ product_args.add_argument(
 ######################################################################
 #  R E S T   A P I   E N D P O I N T S
 ######################################################################
+
 
 ######################################################################
 #  PATH: /products/{id}
@@ -257,6 +258,7 @@ class ProductCollection(Resource):
         location_url = api.url_for(ProductResource, product_id=product.id, _external=True)
         return product.serialize(), status.HTTP_201_CREATED, {"Location": location_url}
 
+
 ######################################################################
 #  PATH: /products/{id}/change_availability
 ######################################################################
@@ -270,7 +272,8 @@ class ChangeAvailResource(Resource):
     def put(self, product_id):
         """
         Change Product Availability
-        This endpoint will change the availability of a Product based on the id specified in the path. 
+
+        This endpoint will change the availability of a Product based on the id specified in the path.
         """
         app.logger.info(
             "Request to change availability for product with id: %s", product_id
@@ -289,6 +292,7 @@ class ChangeAvailResource(Resource):
 
         return message, status.HTTP_200_OK
 
+
 ######################################################################
 #  PATH: /products/collect
 ######################################################################
@@ -299,7 +303,7 @@ class CollectionResource(Resource):
     """
     @api.doc("create_muiltiple_products")
     @api.response(400, "The posted data was not valid")
-    #@api.expect(create_model)
+    # @api.expect(create_model)
     @api.marshal_list_with(product_model, code=201)
     def post(self):
         """
@@ -315,10 +319,10 @@ class CollectionResource(Resource):
             message.append(product.serialize())
         return message, status.HTTP_201_CREATED
 
+
 ######################################################################
 #  PATH: /categories
 ######################################################################
-
 @api.route("/categories", strict_slashes=False)
 class Categories(Resource):
     """

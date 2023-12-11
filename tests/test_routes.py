@@ -23,6 +23,7 @@ BASE_URL = "/api/products"
 COLLECT_URL = "/api/products/collect"
 CONTENT_TYPE_JSON = "application/json"
 
+
 ######################################################################
 #  T E S T   C A S E S
 ######################################################################
