@@ -4,7 +4,7 @@ My Service
 Describe what your service does here
 """
 
-from flask import jsonify, request, abort
+from flask import jsonify, request
 from flask_restx import Resource, fields, reqparse, inputs
 from service.common import status  # HTTP Status Codes
 from service.models import Product, Category
@@ -514,10 +514,14 @@ class Categories(Resource):
 #     return jsonify(categories)
 
 
-# ######################################################################
-# #  U T I L I T Y   F U N C T I O N S
-# ######################################################################
+######################################################################
+#  U T I L I T Y   F U N C T I O N S
+######################################################################
 
+def abort(error_code: int, message: str):
+    """Logs errors before aborting"""
+    app.logger.error(message)
+    api.abort(error_code, message)
 
 # def check_content_type(content_type):
 #     """Checks that the media type is correct"""

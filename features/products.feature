@@ -71,7 +71,7 @@ Scenario: Delete a Product
     And I press the "Delete" button
     Then I should see the message "Product has been Deleted!"
     When I press the "Retrieve" button
-    Then I should see the message "404 Not Found: Product with id"
+    Then I should see the message "not found"
 
 Scenario: Update a Product
     When I visit the "Home Page"
