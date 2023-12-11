@@ -19,8 +19,9 @@ DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/testdb"
 )
 
-BASE_URL = "/products"
-COLLECT_URL = "/products/collect"
+BASE_URL = "/api/products"
+COLLECT_URL = "/api/products/collect"
+CONTENT_TYPE_JSON = "application/json"
 
 
 ######################################################################
@@ -279,7 +280,7 @@ class TestYourResourceServer(TestCase):
 
     def test_get_categories(self):
         """It should return all product categories."""
-        response = self.client.get("/categories")
+        response = self.client.get("/api/categories")
         self.assertEqual(response.status_code, 200)
 
         data = response.get_json()
@@ -328,20 +329,10 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_update_missing_product(self):
-        """It should not update a Product"""
-
-        # create a product
-        test_product_original = ProductFactory()
-        logging.debug("Test Product: %s", test_product_original.serialize())
-        response = self.client.post(BASE_URL, json=test_product_original.serialize())
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        new_product = response.get_json()
-
-        # update
-        test_product_new = ProductFactory()
-        test_product_new.id = new_product["id"] + 1
-        logging.debug("Test Product: %s", test_product_new.serialize())
-        response = self.client.put(
-            f"{BASE_URL}/{test_product_new.id}", json=test_product_new.serialize()
+        """It should not update a Product that doesn't exist"""
+        resp = self.client.put(
+            f"{BASE_URL}/2147483647",
+            json={},
+            content_type=CONTENT_TYPE_JSON,
         )
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
