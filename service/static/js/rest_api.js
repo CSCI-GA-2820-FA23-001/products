@@ -307,7 +307,7 @@ $(function () {
 
 function loadCategories() {
     $.ajax({
-        url: '/categories',
+        url: '/api/categories',
         type: 'GET',
         dataType: 'json',
         success: function(categories) {

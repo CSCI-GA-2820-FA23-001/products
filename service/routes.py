@@ -262,16 +262,15 @@ class ProductCollection(Resource):
 ######################################################################
 @api.route("/products/<product_id>/change_availability")
 @api.param("product_id", "The Product identifier")
-class PurchaseResource(Resource):
+class ChangeAvailResource(Resource):
     """Change availability actions on a Product"""
 
     @api.doc("change_availability")
     @api.response(404, "Product not found")
     def put(self, product_id):
         """
-        Purchase a Product
-
-        This endpoint will purchase a Product and make it unavailable
+        Change Product Availability
+        This endpoint will change the availability of a Product based on the id specified in the path. 
         """
         app.logger.info(
             "Request to change availability for product with id: %s", product_id
@@ -282,21 +281,54 @@ class PurchaseResource(Resource):
                 status.HTTP_404_NOT_FOUND,
                 f"Product with id '{product_id}' was not found.",
             )
-        new_availability = not product.available
-        product.available = new_availability
-        db.session.commit()
-        message = {"message": f"Product availability changed to {new_availability}"}
+        product.change_availability()
+        message = {"message": f"Product availability changed to {product.available}"}
         message = {**message, **product.serialize()}
 
         app.logger.info("Product availability changed for ID [%s].", product_id)
 
-        return jsonify(message), status.HTTP_200_OK
-        
-        product.available = False
-        product.update()
-        app.logger.info("Product with id [%s] has been purchased!", product.id)
-        return product.serialize(), status.HTTP_200_OK
+        return message, status.HTTP_200_OK
 
+######################################################################
+#  PATH: /products/collect
+######################################################################
+@api.route("/products/collect")
+class CollectionResource(Resource):
+    """
+    Creates multiple Products
+    """
+    @api.doc("create_muiltiple_products")
+    @api.response(400, "The posted data was not valid")
+    #@api.expect(create_model)
+    @api.marshal_list_with(product_model, code=201)
+    def post(self):
+        """
+        Creates multiple Products
+        This endpoint will create multiple Products based the data in the body that is posted
+        """
+        app.logger.info("Request to create multiple products")
+        app.logger.debug("Payload = %s", api.payload)
+        products = Product.create_multiple_products(api.payload)
+        message = []
+        for product in products:
+            app.logger.info("Product with ID [%s] created.", product.id)
+            message.append(product.serialize())
+        return message, status.HTTP_201_CREATED
+
+######################################################################
+#  PATH: /categories
+######################################################################
+
+@api.route("/categories", strict_slashes=False)
+class Categories(Resource):
+    """
+    Get Product categories
+    """
+    @api.doc("get_categories")
+    def get(self):
+        """Endpoint to get product categories"""
+        categories = [category.name for category in Category]
+        return categories
 
 # ######################################################################
 # # LIST ALL PRODUCTS
@@ -359,24 +391,24 @@ class PurchaseResource(Resource):
 #     #     return jsonify({"error": "Error creating product"}), status.HTTP_400_BAD_REQUEST
 
 
-######################################################################
-# ADD MULTIPLE NEW PRODUCT
-######################################################################
-@app.route("/products/collect", methods=["POST"])
-def create_collect_products():
-    """
-    Creates multiple Products
-    This endpoint will create multiple Products based the data in the body that is posted
-    """
-    app.logger.info("Request to create multiple products")
-    check_content_type("application/json")
-    products_data = request.get_json()
-    products = Product.create_multiple_products(products_data)
-    message = []
-    for product in products:
-        app.logger.info("Product with ID [%s] created.", product.id)
-        message.append(product.serialize())
-    return jsonify(message), status.HTTP_201_CREATED
+# ######################################################################
+# # ADD MULTIPLE NEW PRODUCT
+# ######################################################################
+# @app.route("/products/collect", methods=["POST"])
+# def create_collect_products():
+#     """
+#     Creates multiple Products
+#     This endpoint will create multiple Products based the data in the body that is posted
+#     """
+#     app.logger.info("Request to create multiple products")
+#     check_content_type("application/json")
+#     products_data = request.get_json()
+#     products = Product.create_multiple_products(products_data)
+#     message = []
+#     for product in products:
+#         app.logger.info("Product with ID [%s] created.", product.id)
+#         message.append(product.serialize())
+#     return jsonify(message), status.HTTP_201_CREATED
 
 
 # ######################################################################
@@ -463,44 +495,44 @@ def create_collect_products():
 #             f"Product with id '{product_id}' was not found.",
 #         )
 
-    product.change_availability()
-    message = {"message": f"Product availability changed to {product.available}"}
-    message = {**message, **product.serialize()}
+#    product.change_availability()
+#    message = {"message": f"Product availability changed to {product.available}"}
+#    message = {**message, **product.serialize()}
 
 #     app.logger.info("Product availability changed for ID [%s].", product_id)
 
 #     return jsonify(message), status.HTTP_200_OK
 
 
-######################################################################
-# get product categories
-######################################################################
-@app.route("/categories", methods=["GET"])
-def get_categories():
-    """Endpoint to get product categories"""
-    categories = [category.name for category in Category]
-    return jsonify(categories)
+# ######################################################################
+# # get product categories
+# ######################################################################
+# @app.route("/categories", methods=["GET"])
+# def get_categories():
+#     """Endpoint to get product categories"""
+#     categories = [category.name for category in Category]
+#     return jsonify(categories)
 
 
-######################################################################
-#  U T I L I T Y   F U N C T I O N S
-######################################################################
+# ######################################################################
+# #  U T I L I T Y   F U N C T I O N S
+# ######################################################################
 
 
-def check_content_type(content_type):
-    """Checks that the media type is correct"""
-    if "Content-Type" not in request.headers:
-        app.logger.error("No Content-Type specified.")
-        abort(
-            status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            f"Content-Type must be {content_type}",
-        )
+# def check_content_type(content_type):
+#     """Checks that the media type is correct"""
+#     if "Content-Type" not in request.headers:
+#         app.logger.error("No Content-Type specified.")
+#         abort(
+#             status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+#             f"Content-Type must be {content_type}",
+#         )
 
-    if request.headers["Content-Type"] == content_type:
-        return
+#     if request.headers["Content-Type"] == content_type:
+#         return
 
-    app.logger.error("Invalid Content-Type: %s", request.headers["Content-Type"])
-    abort(
-        status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-        f"Content-Type must be {content_type}",
-    )
+#     app.logger.error("Invalid Content-Type: %s", request.headers["Content-Type"])
+#     abort(
+#         status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+#         f"Content-Type must be {content_type}",
+#     )

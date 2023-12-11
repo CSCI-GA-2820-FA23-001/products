@@ -20,7 +20,7 @@ DATABASE_URI = os.getenv(
 )
 
 BASE_URL = "/api/products"
-COLLECT_URL = "/products/collect"
+COLLECT_URL = "/api/products/collect"
 CONTENT_TYPE_JSON = "application/json"
 
 ######################################################################
@@ -279,7 +279,7 @@ class TestYourResourceServer(TestCase):
 
     def test_get_categories(self):
         """It should return all product categories."""
-        response = self.client.get("/categories")
+        response = self.client.get("/api/categories")
         self.assertEqual(response.status_code, 200)
 
         data = response.get_json()
