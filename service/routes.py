@@ -7,7 +7,7 @@ Describe what your service does here
 from flask import jsonify, request, abort
 from flask_restx import Resource, fields, reqparse, inputs
 from service.common import status  # HTTP Status Codes
-from service.models import Product, Category, db
+from service.models import Product, Category
 
 # Import Flask application
 from . import app, api
@@ -463,11 +463,9 @@ def create_collect_products():
 #             f"Product with id '{product_id}' was not found.",
 #         )
 
-#     new_availability = not product.available
-#     product.available = new_availability
-#     db.session.commit()
-#     message = {"message": f"Product availability changed to {new_availability}"}
-#     message = {**message, **product.serialize()}
+    product.change_availability()
+    message = {"message": f"Product availability changed to {product.available}"}
+    message = {**message, **product.serialize()}
 
 #     app.logger.info("Product availability changed for ID [%s].", product_id)
 

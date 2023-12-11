@@ -138,6 +138,14 @@ class Product(db.Model):
             ) from error
         return self
 
+    def change_availability(self):
+        """
+        Changes the availability of the Product
+        """
+        self.available = not self.available
+        db.session.commit()
+        logger.info("Availability changed for %s", self.name)
+
     # # flake8: noqa: C901
     # def deserialize_update(self, data):
     #     """

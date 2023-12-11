@@ -138,6 +138,23 @@ class TestProductModel(unittest.TestCase):
         product.delete()
         self.assertEqual(len(Product.all()), 0)
 
+    def test_change_product_availability(self):
+        """It should change the availability of a product"""
+        # Create a product
+        product = ProductFactory()
+        logging.debug(product)
+        product.id = None
+        product.create()
+        self.assertIsNotNone(product.id)
+        # Check initial availability
+        initial_availability = product.available
+        # Change availability
+        product.change_availability()
+        self.assertNotEqual(product.available, initial_availability)
+        # Fetch it back and verify the change
+        updated_product = Product.find(product.id)
+        self.assertEqual(updated_product.available, not initial_availability)
+
     def test_list_all_products(self):
         """It should List all products in the database"""
         products = Product.all()
