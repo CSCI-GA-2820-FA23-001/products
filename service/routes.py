@@ -156,6 +156,51 @@ class ProductResource(Resource):
             abort(status.HTTP_404_NOT_FOUND, f"Product with id '{product_id}' was not found.")
         return product.serialize(), status.HTTP_200_OK
 
+    # ------------------------------------------------------------------
+    # UPDATE AN EXISTING PRODUCT
+    # ------------------------------------------------------------------
+    @api.doc("update_products")
+    @api.response(404, "Product not found")
+    @api.response(400, "The posted Product data was not valid")
+    @api.expect(product_model)
+    @api.marshal_with(product_model)
+    def put(self, product_id):
+        """
+        Update a Product
+
+        This endpoint will update a Product based the body that is posted
+        """
+        app.logger.info("Request to Update a product with id [%s]", product_id)
+        product = Product.find(product_id)
+        if not product:
+            abort(status.HTTP_404_NOT_FOUND, f"Product with id '{product_id}' was not found.")
+        app.logger.debug("Payload = %s", api.payload)
+        data = api.payload
+        product.deserialize(data)
+        product.id = product_id
+        product.update()
+        return product.serialize(), status.HTTP_200_OK
+
+    # ------------------------------------------------------------------
+    # DELETE A PRODUCT
+    # ------------------------------------------------------------------
+    @api.doc("delete_products")
+    @api.response(204, "Product deleted")
+    def delete(self, product_id):
+        """
+        Delete a Product
+
+        This endpoint will delete a Product based the id specified in the path
+        """
+        app.logger.info("Request to Delete a product with id [%s]", product_id)
+        product = Product.find(product_id)
+        if product:
+            product.delete()
+            app.logger.info("Product with id [%s] was deleted", product_id)
+
+        return "", status.HTTP_204_NO_CONTENT
+
+
 ######################################################################
 #  PATH: /products
 ######################################################################
@@ -211,6 +256,46 @@ class ProductCollection(Resource):
         app.logger.info("Product with new id [%s] created!", product.id)
         location_url = api.url_for(ProductResource, product_id=product.id, _external=True)
         return product.serialize(), status.HTTP_201_CREATED, {"Location": location_url}
+
+######################################################################
+#  PATH: /products/{id}/change_availability
+######################################################################
+@api.route("/products/<product_id>/change_availability")
+@api.param("product_id", "The Product identifier")
+class PurchaseResource(Resource):
+    """Change availability actions on a Product"""
+
+    @api.doc("change_availability")
+    @api.response(404, "Product not found")
+    def put(self, product_id):
+        """
+        Purchase a Product
+
+        This endpoint will purchase a Product and make it unavailable
+        """
+        app.logger.info(
+            "Request to change availability for product with id: %s", product_id
+        )
+        product = Product.find(product_id)
+        if not product:
+            abort(
+                status.HTTP_404_NOT_FOUND,
+                f"Product with id '{product_id}' was not found.",
+            )
+        new_availability = not product.available
+        product.available = new_availability
+        db.session.commit()
+        message = {"message": f"Product availability changed to {new_availability}"}
+        message = {**message, **product.serialize()}
+
+        app.logger.info("Product availability changed for ID [%s].", product_id)
+
+        return jsonify(message), status.HTTP_200_OK
+        
+        product.available = False
+        product.update()
+        app.logger.info("Product with id [%s] has been purchased!", product.id)
+        return product.serialize(), status.HTTP_200_OK
 
 
 # ######################################################################
@@ -294,49 +379,49 @@ def create_collect_products():
     return jsonify(message), status.HTTP_201_CREATED
 
 
-######################################################################
-# UPDATE A PRODUCT
-######################################################################
-@app.route("/products/<int:product_id>", methods=["PUT"])
-def update_product(product_id):
-    """
-    Update a Product
-    This endpoint will update a existing Product based the data in the body that is posted
-    or return 404 there is no product with id provided in payload
-    """
+# ######################################################################
+# # UPDATE A PRODUCT
+# ######################################################################
+# @app.route("/products/<int:product_id>", methods=["PUT"])
+# def update_product(product_id):
+#     """
+#     Update a Product
+#     This endpoint will update a existing Product based the data in the body that is posted
+#     or return 404 there is no product with id provided in payload
+#     """
 
-    app.logger.info("Request to update a product")
-    check_content_type("application/json")
+#     app.logger.info("Request to update a product")
+#     check_content_type("application/json")
 
-    product: Product = Product.find(product_id)
-    if not product:
-        app.logger.info("Invalid product id: %s", product_id)
-        abort(
-            status.HTTP_404_NOT_FOUND, f"There is no exist product with id {product_id}"
-        )
-    product.deserialize(request.get_json())
-    product.update()
-    message = product.serialize()
+#     product: Product = Product.find(product_id)
+#     if not product:
+#         app.logger.info("Invalid product id: %s", product_id)
+#         abort(
+#             status.HTTP_404_NOT_FOUND, f"There is no exist product with id {product_id}"
+#         )
+#     product.deserialize(request.get_json())
+#     product.update()
+#     message = product.serialize()
 
-    return jsonify(message), status.HTTP_200_OK
+#     return jsonify(message), status.HTTP_200_OK
 
 
-######################################################################
-# DELETE A PRODUCT
-######################################################################
-@app.route("/products/<int:product_id>", methods=["DELETE"])
-def delete_products(product_id):
-    """
-    Delete a Product
-    This endpoint will delete a Product based the id specified in the path
-    """
-    app.logger.info("Request to delete product with id: %s", product_id)
-    product = Product.find(product_id)
-    if product:
-        product.delete()
+# ######################################################################
+# # DELETE A PRODUCT
+# ######################################################################
+# @app.route("/products/<int:product_id>", methods=["DELETE"])
+# def delete_products(product_id):
+#     """
+#     Delete a Product
+#     This endpoint will delete a Product based the id specified in the path
+#     """
+#     app.logger.info("Request to delete product with id: %s", product_id)
+#     product = Product.find(product_id)
+#     if product:
+#         product.delete()
 
-    app.logger.info("Product with ID [%s] delete complete.", product_id)
-    return "", status.HTTP_204_NO_CONTENT
+#     app.logger.info("Product with ID [%s] delete complete.", product_id)
+#     return "", status.HTTP_204_NO_CONTENT
 
 
 # ######################################################################
@@ -359,34 +444,34 @@ def delete_products(product_id):
 #     return jsonify(product.serialize()), status.HTTP_200_OK
 
 
-######################################################################
-# ACTION TO CHANGE A PRODUCT'S AVAILABILITY
-######################################################################
-@app.route("/products/<int:product_id>/change_availability", methods=["PUT"])
-def change_product_availability(product_id):
-    """
-    Change Product Availability
-    This endpoint will change the availability of a Product based on the id specified in the path.
-    """
-    app.logger.info(
-        "Request to change availability for product with id: %s", product_id
-    )
-    product = Product.find(product_id)
-    if not product:
-        abort(
-            status.HTTP_404_NOT_FOUND,
-            f"Product with id '{product_id}' was not found.",
-        )
+# ######################################################################
+# # ACTION TO CHANGE A PRODUCT'S AVAILABILITY
+# ######################################################################
+# @app.route("/products/<int:product_id>/change_availability", methods=["PUT"])
+# def change_product_availability(product_id):
+#     """
+#     Change Product Availability
+#     This endpoint will change the availability of a Product based on the id specified in the path.
+#     """
+#     app.logger.info(
+#         "Request to change availability for product with id: %s", product_id
+#     )
+#     product = Product.find(product_id)
+#     if not product:
+#         abort(
+#             status.HTTP_404_NOT_FOUND,
+#             f"Product with id '{product_id}' was not found.",
+#         )
 
-    new_availability = not product.available
-    product.available = new_availability
-    db.session.commit()
-    message = {"message": f"Product availability changed to {new_availability}"}
-    message = {**message, **product.serialize()}
+#     new_availability = not product.available
+#     product.available = new_availability
+#     db.session.commit()
+#     message = {"message": f"Product availability changed to {new_availability}"}
+#     message = {**message, **product.serialize()}
 
-    app.logger.info("Product availability changed for ID [%s].", product_id)
+#     app.logger.info("Product availability changed for ID [%s].", product_id)
 
-    return jsonify(message), status.HTTP_200_OK
+#     return jsonify(message), status.HTTP_200_OK
 
 
 ######################################################################
