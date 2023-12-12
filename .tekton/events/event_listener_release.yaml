@@ -20,7 +20,7 @@ spec:
           - name: "eventTypes"
             value: ["release"]
       bindings:
-        - ref: cd-binding
+        - ref: cd-binding-release
       template:
         ref: cd-template
 
