@@ -25,7 +25,7 @@ spec:
   - name: SECRET_NAME
     description: The name of the secret containing a database_uri key
     type: string
-    default: "postgres-creds"
+    default: "postgres-secret"
   - name: SECRET_KEY
     description: The name of the key that contains the database uri
     type: string
