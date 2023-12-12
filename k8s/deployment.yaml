@@ -25,6 +25,7 @@ spec:
         # This image used in RedHat OpenShift
         image: cluster-registry:32000/products:latest
         # If you don't use ./tekton, use this image in other k8s
+        #
         # image: docker.io/gorgeous/devops-23fall-products:20231127205915
         imagePullPolicy: IfNotPresent
         ports:
