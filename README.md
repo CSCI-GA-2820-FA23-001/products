@@ -9,25 +9,8 @@ This is a skeleton you can use to start your projects
 
 ## Overview
 
-This project template contains starter code for your class project. The `/service` folder contains your `models.py` file for your model and a `routes.py` file for your service. The `/tests` folder has test case starter code for testing the model and the service separately. All you need to do is add your functionality. You can use the [lab-flask-tdd](https://github.com/nyu-devops/lab-flask-tdd) for code examples to copy from.
+This project is **Products** microservices with Flask framework. Both unit and behave tests are included. You can use `flask run` start it, and the Swagger Docs support on `/apidocs`.
 
-## Automatic Setup
-
-The best way to use this repo is to start your own repo using it as a git template. To do this just press the green **Use this template** button in GitHub and this will become the source for your repository.
-
-## Manual Setup
-
-You can also clone this repository and then copy and paste the starter code into your project repo folder on your local computer. Be careful not to copy over your own `README.md` file so be selective in what you copy.
-
-There are 4 hidden files that you will need to copy manually if you use the Mac Finder or Windows Explorer to copy files from this folder into your repo folder.
-
-These should be copied using a bash shell as follows:
-
-```bash
-    cp .gitignore  ../<your_repo_folder>/
-    cp .flaskenv ../<your_repo_folder>/
-    cp .gitattributes ../<your_repo_folder>/
-```
 
 ## Contents
 
@@ -55,6 +38,21 @@ tests/              - test cases package
 ├── __init__.py     - package initializer
 ├── test_models.py  - test suite for business models
 └── test_routes.py  - test suite for service routes
+
+
+k8s/                - Kubernetes yaml
+├── Dockerfile      - For building production image
+└── ...             - APP Deployment, Postgres StatefulSet, Secret, Service, etc.
+
+.tekton/            - OpenShift tekton yaml
+├── pipeline.yaml   - CI & CD pipelines
+├── tasks.yaml      - tasks in pipelines
+└── workspace.yaml  - PVC for pipelines
+└── events                  - event listener and trigger
+    ├── event_listener.yaml 
+    ├── route.yaml              - Listener and APP's routes
+    └── trigger_binding.yaml
+    └── trigger_template.yaml
 ```
 
 ## Database Structure
@@ -73,13 +71,13 @@ tests/              - test cases package
 
 | Method | Example URI | Function | Description 
 | ------ | ----------- | -------- | -------------
-| GET    | `/products` | List     | Returns all the products in the databse (can be filtered by a query string)
-| POST   | `/products` | Create   | Create a new product, and upon success, receive a Location header specifying the new order's URI
-| POST   | `/products/collect` | Create   | Create multiple products, return these created
-| PUT   | `/products/<product_id>` | Update   | Update fields of a existing product
+| GET    | `/api/products` | List     | Returns all the products in the databse (can be filtered by a query string)
+| POST   | `/api/products` | Create   | Create a new product, and upon success, receive a Location header specifying the new order's URI
+| POST   | `/api/products/collect` | Create   | Create multiple products, return these created
+| PUT   | `/api/products/<product_id>` | Update   | Update fields of a existing product
 | DELETE   | `/products/<product_id>` | Delete   | Delete a Product based on the id specified in the path
-| GET   | `/products/<product_id>` | Read   | Read a Product based on the id specified in the path
-| PUT   | `/products/<int:product_id>/change_availability` | Update   | change the availability of a Product based on the id
+| GET   | `/api/products/<product_id>` | Read   | Read a Product based on the id specified in the path
+| PUT   | `/api/products/<int:product_id>/change_availability` | Update   | change the availability of a Product based on the id
 
 ## License
 
