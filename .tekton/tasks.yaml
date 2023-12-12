@@ -187,7 +187,7 @@ spec:
             python -m pip install --upgrade pip wheel
             pip install -qr requirements.txt
             echo "\n*** STARTING APPLICATION ***\n"
-            sleep 5
-            curl -i $(params.BASE_URL)
+            sleep 30
+            curl -L -I $(params.BASE_URL)
             echo "***** Running BDD *****"
             behave
