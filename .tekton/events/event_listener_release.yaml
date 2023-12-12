@@ -1,7 +1,7 @@
 apiVersion: triggers.tekton.dev/v1beta1
 kind: EventListener
 metadata:
-  name: cd-listener
+  name: cd-listener-release
 spec:
   serviceAccountName: pipeline
   triggers:
@@ -23,3 +23,22 @@ spec:
         - ref: cd-binding
       template:
         ref: cd-template
+
+---
+
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: cd-binding-release
+spec:
+  params:
+  - name: git-repo-url
+    value: $(body.repository.clone_url)
+  - name: git-repo-name
+    value: $(body.repository.name)
+  - name: git-revision
+    # use release tag name
+    value: $(body.release.tag_name)
+  - name: git-ref
+    # use release tag name
+    value: $(body.release.tag_name)
