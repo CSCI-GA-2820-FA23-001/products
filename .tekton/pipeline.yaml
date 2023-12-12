@@ -159,3 +159,17 @@ spec:
     workspaces:
     - name: source
       workspace: pipeline-workspace
+      
+  - name: behave
+    params:
+      - name: BASE_URL
+        value: >-
+          https://products-hao-li-dev.apps.sandbox-m3.1530.p1.openshiftapps.com/
+    runAfter:
+      - deploy-image
+    taskRef:
+      kind: Task
+      name: behave
+    workspaces:
+      - name: source
+        workspace: pipeline-workspace
