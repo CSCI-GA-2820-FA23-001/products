@@ -15,6 +15,10 @@ spec:
     description: The reference (branch or ref)
     name: GIT_REF
     type: string
+  - default: '-vvv --processes=1 --run-coverage --minimum-coverage=95'
+    description: Arguments for green testing
+    name: GREEN_ARGS
+    type: string
   - default: products
     description: Name of the application
     name: APP_NAME
@@ -68,6 +72,44 @@ spec:
     - name: output
       workspace: pipeline-workspace
 
+  - name: pylint
+    params:
+    - name: image
+      value: 'docker.io/rofrano/nyu-devops-base:fa23'
+    - name: path
+      value: service
+    - name: requirements_file
+      value: requirements.txt
+    - name: args
+      value: ["--max-line-length=127"]
+    - name: pip_conf_file
+      value: pip.conf
+    runAfter:
+    - git-clone
+    taskRef:
+      kind: Task
+      name: pylint
+    workspaces:
+    - name: source
+      workspace: pipeline-workspace
+
+  - name: testing
+    params:
+      - name: ARGS
+        value: $(params.GREEN_ARGS)
+      - name: SECRET_NAME
+        value: postgres-secret
+      - name: SECRET_KEY
+        value: database_uri
+    runAfter:
+      - git-clone
+    taskRef:
+      kind: Task
+      name: green
+    workspaces:
+      - name: source
+        workspace: pipeline-workspace
+
   - name: buildah
     params:
     - name: IMAGE
@@ -92,7 +134,8 @@ spec:
     - name: SKIP_PUSH
       value: 'false'
     runAfter:
-    - git-clone
+      - pylint
+      - testing
     taskRef:
       kind: ClusterTask
       name: buildah
